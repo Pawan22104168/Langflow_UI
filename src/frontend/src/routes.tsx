@@ -5,10 +5,6 @@ import {
   Outlet,
   Route,
 } from "react-router-dom";
-import { ProtectedAdminRoute } from "./components/authorization/authAdminGuard";
-import { ProtectedRoute } from "./components/authorization/authGuard";
-import { ProtectedLoginRoute } from "./components/authorization/authLoginGuard";
-import { AuthSettingsGuard } from "./components/authorization/authSettingsGuard";
 import ContextWrapper from "./contexts";
 import CustomDashboardWrapperPage from "./customization/components/custom-DashboardWrapperPage";
 import { CustomNavigate } from "./customization/components/custom-navigate";
@@ -20,7 +16,6 @@ import {
 import { CustomRoutesStore } from "./customization/utils/custom-routes-store";
 import { CustomRoutesStorePages } from "./customization/utils/custom-routes-store-pages";
 import { AppAuthenticatedPage } from "./pages/AppAuthenticatedPage";
-import { AppInitPage } from "./pages/AppInitPage";
 import { AppWrapperPage } from "./pages/AppWrapperPage";
 import FlowPage from "./pages/FlowPage";
 import LoginPage from "./pages/LoginPage";
@@ -65,139 +60,101 @@ const router = createBrowserRouter(
         </ContextWrapper>
       }
     >
-      <Route path="" element={<AppInitPage />}>
+      {/* Directly render the authenticated app without login check */}
+      <Route path="" element={<AppAuthenticatedPage />}>
         <Route path="" element={<AppWrapperPage />}>
-          <Route
-            path=""
-            element={
-              <ProtectedRoute>
-                <Outlet />
-              </ProtectedRoute>
-            }
-          >
-            <Route path="" element={<AppAuthenticatedPage />}>
-              <Route path="" element={<CustomDashboardWrapperPage />}>
-                <Route path="" element={<CollectionPage />}>
+          <Route path="" element={<CustomDashboardWrapperPage />}>
+            <Route path="" element={<CollectionPage />}>
+              <Route
+                index
+                element={<CustomNavigate replace to={"flows"} />}
+              />
+              {ENABLE_FILE_MANAGEMENT && (
+                <Route path="assets">
                   <Route
                     index
-                    element={<CustomNavigate replace to={"flows"} />}
+                    element={<CustomNavigate replace to="files" />}
                   />
-                  {ENABLE_FILE_MANAGEMENT && (
-                    <Route path="assets">
-                      <Route
-                        index
-                        element={<CustomNavigate replace to="files" />}
-                      />
-                      <Route path="files" element={<FilesPage />} />
-                      <Route
-                        path="knowledge-bases"
-                        element={<KnowledgePage />}
-                      />
-                    </Route>
-                  )}
+                  <Route path="files" element={<FilesPage />} />
                   <Route
-                    path="flows/"
-                    element={<HomePage key="flows" type="flows" />}
+                    path="knowledge-bases"
+                    element={<KnowledgePage />}
                   />
-                  <Route
-                    path="components/"
-                    element={<HomePage key="components" type="components" />}
-                  >
-                    <Route
-                      path="folder/:folderId"
-                      element={<HomePage key="components" type="components" />}
-                    />
-                  </Route>
-                  <Route
-                    path="all/"
-                    element={<HomePage key="flows" type="flows" />}
-                  >
-                    <Route
-                      path="folder/:folderId"
-                      element={<HomePage key="flows" type="flows" />}
-                    />
-                  </Route>
-                  <Route
-                    path="mcp/"
-                    element={<HomePage key="mcp" type="mcp" />}
-                  >
-                    <Route
-                      path="folder/:folderId"
-                      element={<HomePage key="mcp" type="mcp" />}
-                    />
-                  </Route>
                 </Route>
-                <Route path="settings" element={<SettingsPage />}>
-                  <Route
-                    index
-                    element={<CustomNavigate replace to={"general"} />}
-                  />
-                  <Route
-                    path="global-variables"
-                    element={<GlobalVariablesPage />}
-                  />
-                  <Route path="mcp-servers" element={<MCPServersPage />} />
-                  <Route path="api-keys" element={<ApiKeysPage />} />
-                  <Route
-                    path="general/:scrollId?"
-                    element={
-                      <AuthSettingsGuard>
-                        <GeneralPage />
-                      </AuthSettingsGuard>
-                    }
-                  />
-                  <Route path="shortcuts" element={<ShortcutsPage />} />
-                  <Route path="messages" element={<MessagesPage />} />
-                  {CustomRoutesStore()}
-                </Route>
-                {CustomRoutesStorePages()}
-                <Route path="account">
-                  <Route path="delete" element={<DeleteAccountPage />}></Route>
-                </Route>
+              )}
+              <Route
+                path="flows/"
+                element={<HomePage key="flows" type="flows" />}
+              />
+              <Route
+                path="components/"
+                element={<HomePage key="components" type="components" />}
+              >
                 <Route
-                  path="admin"
-                  element={
-                    <ProtectedAdminRoute>
-                      <AdminPage />
-                    </ProtectedAdminRoute>
-                  }
+                  path="folder/:folderId"
+                  element={<HomePage key="components" type="components" />}
                 />
               </Route>
-              <Route path="flow/:id/">
-                <Route path="" element={<CustomDashboardWrapperPage />}>
-                  <Route path="folder/:folderId/" element={<FlowPage />} />
-                  <Route path="" element={<FlowPage />} />
-                </Route>
-                <Route path="view" element={<ViewPage />} />
+              <Route
+                path="all/"
+                element={<HomePage key="flows" type="flows" />}
+              >
+                <Route
+                  path="folder/:folderId"
+                  element={<HomePage key="flows" type="flows" />}
+                />
+              </Route>
+              <Route
+                path="mcp/"
+                element={<HomePage key="mcp" type="mcp" />}
+              >
+                <Route
+                  path="folder/:folderId"
+                  element={<HomePage key="mcp" type="mcp" />}
+                />
               </Route>
             </Route>
+            <Route path="settings" element={<SettingsPage />}>
+              <Route
+                index
+                element={<CustomNavigate replace to={"general"} />}
+              />
+              <Route
+                path="global-variables"
+                element={<GlobalVariablesPage />}
+              />
+              <Route path="mcp-servers" element={<MCPServersPage />} />
+              <Route path="api-keys" element={<ApiKeysPage />} />
+              <Route
+                path="general/:scrollId?"
+                element={<GeneralPage />}
+              />
+              <Route path="shortcuts" element={<ShortcutsPage />} />
+              <Route path="messages" element={<MessagesPage />} />
+              {CustomRoutesStore()}
+            </Route>
+            {CustomRoutesStorePages()}
+            <Route path="account">
+              <Route path="delete" element={<DeleteAccountPage />}></Route>
+            </Route>
+            <Route path="admin" element={<AdminPage />} />
           </Route>
-          <Route
-            path="login"
-            element={
-              <ProtectedLoginRoute>
-                <LoginPage />
-              </ProtectedLoginRoute>
-            }
-          />
-          <Route
-            path="signup"
-            element={
-              <ProtectedLoginRoute>
-                <SignUp />
-              </ProtectedLoginRoute>
-            }
-          />
-          <Route
-            path="login/admin"
-            element={
-              <ProtectedLoginRoute>
-                <LoginAdminPage />
-              </ProtectedLoginRoute>
-            }
-          />
+          <Route path="flow/:id/">
+            <Route path="" element={<CustomDashboardWrapperPage />}>
+              <Route path="folder/:folderId/" element={<FlowPage />} />
+              <Route path="" element={<FlowPage />} />
+            </Route>
+            <Route path="view" element={<ViewPage />} />
+          </Route>
         </Route>
       </Route>
+
+      {/* Login routes WITHOUT ProtectedLoginRoute wrapper */}
+      <Route path="login" element={<LoginPage />} />
+      <Route path="signup" element={<SignUp />} />
+      <Route path="login/admin" element={<LoginAdminPage />} />
+
+      {/* Redirect unknown routes to root */}
       <Route path="*" element={<CustomNavigate replace to="/" />} />
     </Route>,
   ]),
